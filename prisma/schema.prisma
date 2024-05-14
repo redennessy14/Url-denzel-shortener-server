@@ -16,6 +16,20 @@ model User {
   password     String
   isActive     Boolean  @default(false)
   registerLink String?  @unique @map("register_link")
+  urls         Url[]
 
   @@map("user")
+}
+
+model Url {
+  id           String   @id @default(cuid())
+  name         String
+  originalLink String   @map("original_link")
+  shortLink    String   @unique @map("short_link")
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User?    @relation(fields: [userId], references: [id])
+  userId       String?  @map("user_id")
+  qrCode       String?  @map("qr_code")
+
+  @@map("url")
 }

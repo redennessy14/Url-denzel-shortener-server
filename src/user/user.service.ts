@@ -27,7 +27,7 @@ export class UserService {
   getByRegisterLink(registerLink: string) {
     return this.prisma.user.findUnique({
       where: {
-        registerLink: registerLink,
+        registerLink,
       },
     });
   }

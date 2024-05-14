@@ -11,6 +11,7 @@ import { UserService } from 'src/user/user.service';
 import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { verify } from 'argon2';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -88,6 +89,19 @@ export class AuthService {
     if (!isValid) throw new UnauthorizedException('Неверный пароль или логин');
 
     return user;
+  }
+
+  addRefreshTokenToResponse(res: Response, refreshToken: string) {
+    const expiresIn = new Date();
+    expiresIn.setDate(expiresIn.getDate() + this.EXPIRE_DAY_REFRESH_TOKEN);
+
+    res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
+      httpOnly: true,
+      domain: 'localhost',
+      expires: expiresIn,
+      secure: true,
+      sameSite: 'none',
+    });
   }
 
   private async sendRegistrationEmail(

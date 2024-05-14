@@ -5,9 +5,10 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from './config/mailer.config';
+import { UrlsModule } from './urls/urls.module';
 
 @Module({
-  imports: [MailerModule.forRoot(mailerConfig), AuthModule, UserModule],
+  imports: [MailerModule.forRoot(mailerConfig), AuthModule, UserModule, UrlsModule],
   controllers: [AppController],
   providers: [AppService],
 })
