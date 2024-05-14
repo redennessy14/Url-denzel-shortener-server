@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UrlsDto } from './dto/urls.dto';
 import { PrismaService } from 'src/prisma.service';
 import * as shortid from 'shortid';
@@ -30,12 +34,20 @@ export class UrlsService {
     });
   }
 
+  async getLink(shortLink: string) {
+    return this.prisma.url.findUnique({
+      where: {
+        shortLink: shortLink,
+      },
+    });
+  }
+
   async create(dto: UrlsDto, userId?: string) {
     const shortLink = shortid.generate();
 
     const data: any = {
       ...dto,
-      shortLink: `denzel.com/${shortLink}`,
+      shortLink: `${shortLink}`,
     };
 
     if (userId) {
@@ -56,6 +68,20 @@ export class UrlsService {
     });
   }
 
+  async updateStatistics(id: string, ipAddress: string) {
+    const url = await this.getOne(id);
+    const updatedUniqueUsers = url.uniqueUsers.includes(ipAddress)
+      ? url.uniqueUsers
+      : [...url.uniqueUsers, ipAddress];
+
+    const redirectCount = url.redirect + 1;
+
+    return this.prisma.url.update({
+      where: { id },
+      data: { uniqueUsers: updatedUniqueUsers, redirect: redirectCount },
+    });
+  }
+
   async delete(id: string) {
     return await this.prisma.url.delete({
       where: {
@@ -65,11 +91,7 @@ export class UrlsService {
   }
 
   async getQr(id: string) {
-    const data = await this.prisma.url.findUnique({
-      where: {
-        id: id,
-      },
-    });
+    const data = await this.getOne(id);
     if (!data) {
       return null;
     }
@@ -86,7 +108,9 @@ export class UrlsService {
       'images',
       fileName,
     );
+
     await fs.writeFile(imagePath, qr);
+
     await this.prisma.url.update({
       where: { id: id },
       data: {
