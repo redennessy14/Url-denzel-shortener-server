@@ -15,7 +15,6 @@ export class RedirectController {
 
   @Get(':shortLink')
   async redirect(@Param('shortLink') shortLink: string, @Req() req: Request) {
-    const ipAddress = req.ip;
-    return this.redirectService.redirect(shortLink, ipAddress);
+    return this.redirectService.redirect(shortLink, req.ip);
   }
 }

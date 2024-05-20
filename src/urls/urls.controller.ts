@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { UrlsService } from './urls.service';
 import { UrlsDto } from './dto/urls.dto';
 import { CurrentUser } from 'src/auth/decorator/user.decorator';
 import { Auth } from 'src/auth/decorator/auth.decorator';
+import { Response } from 'express';
 
 @Controller('urls')
 export class UrlsController {
@@ -46,15 +48,22 @@ export class UrlsController {
     return this.urlsService.update(dto, id);
   }
 
+  @UsePipes(new ValidationPipe())
   @Delete(':id')
   @Auth()
   async delete(@Param('id') id: string) {
     return this.urlsService.delete(id);
   }
 
+  @UsePipes(new ValidationPipe())
   @Get(':id/qr')
-  @Auth()
-  async getQr(@Param('id') id: string) {
-    return this.urlsService.getQr(id);
+  // @Auth()
+  async getQr(@Param('id') id: string, @Res() res: Response) {
+    const imagePath = await this.urlsService.getQr(id);
+    if (!imagePath) {
+      res.status(404).send('QR не найден');
+      return;
+    }
+    res.sendFile(imagePath);
   }
 }

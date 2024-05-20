@@ -9,9 +9,10 @@ import {
 import { AuthDto } from './dto/auth.dto';
 import { UserService } from 'src/user/user.service';
 import { JwtService, TokenExpiredError } from '@nestjs/jwt';
-import { verify } from 'argon2';
+
 import { MailerService } from '@nestjs-modules/mailer';
 import { Response } from 'express';
+import { verify } from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -70,7 +71,6 @@ export class AuthService {
     const refreshToken = this.jwt.sign(data, {
       expiresIn: '7d',
     });
-
     return { accessToken, refreshToken };
   }
 
@@ -85,7 +85,6 @@ export class AuthService {
     if (!user) throw new NotFoundException('Пользователь не найдет');
 
     const isValid = await verify(user.password, dto.password);
-
     if (!isValid) throw new UnauthorizedException('Неверный пароль или логин');
 
     return user;
@@ -104,10 +103,7 @@ export class AuthService {
     });
   }
 
-  private async sendRegistrationEmail(
-    email: string,
-    registerLink: string,
-  ): Promise<void> {
+  private async sendRegistrationEmail(email: string, registerLink: string) {
     try {
       await this.mailerService.sendMail({
         to: email,
@@ -137,7 +133,7 @@ export class AuthService {
       this.jwt.verify(registerLink);
 
       user.isActive = true;
-      await this.userService.update(user.id, user);
+      await this.userService.confirm(user.id);
       return 'Аккаунт успешно активирован';
     } catch (error) {
       if (error instanceof TokenExpiredError) {

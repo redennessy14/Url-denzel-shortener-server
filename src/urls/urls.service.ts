@@ -95,19 +95,13 @@ export class UrlsService {
     if (!data) {
       return null;
     }
+
     const url = data.shortLink;
     const qr = qrImage.imageSync(url, { type: 'png' });
 
     const fileName = `qr_${id}.png`;
 
-    const imagePath = path.join(
-      __dirname,
-      '..',
-      '..',
-      'src',
-      'images',
-      fileName,
-    );
+    const imagePath = path.join(__dirname, '..', '..', 'src', fileName);
 
     await fs.writeFile(imagePath, qr);
 

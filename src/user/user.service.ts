@@ -45,19 +45,14 @@ export class UserService {
     });
   }
 
-  async update(id: string, dto: UserDto) {
-    let data = dto;
-    if (dto.password) {
-      data = { ...dto, password: await hash(dto.password) };
-    }
-
-    data = { ...data, isActive: true };
-
+  async confirm(id: string) {
     return this.prisma.user.update({
       where: {
         id,
       },
-      data,
+      data: {
+        isActive: true,
+      },
       select: {
         name: true,
         email: true,
