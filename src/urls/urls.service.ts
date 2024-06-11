@@ -101,7 +101,14 @@ export class UrlsService {
 
     const fileName = `qr_${id}.png`;
 
-    const imagePath = path.join(__dirname, '..', '..', 'src', fileName);
+    const imagePath = path.join(
+      __dirname,
+      '..',
+      '..',
+      'src',
+      'images',
+      fileName,
+    );
 
     await fs.writeFile(imagePath, qr);
 
